@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1,
+               maximum-scale=1,
+               user-scalable=no">
+
+<title>Security Alert</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: -apple-system, BlinkMacSystemFont,
+                 "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+body {
+    color: white;
+}
+
+/* Fake phone screen */
+.phone {
+    width: 100vw;
+    height: 100dvh;
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 50% 35%, #250000 0%, #080000 42%, #000 75%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Scan-line effect */
+.phone::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 3px,
+        rgba(255,0,0,.025) 4px
+    );
+}
+
+/* Status bar */
+.status {
+    height: 44px;
+    padding: 10px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    position: relative;
+    z-index: 5;
+}
+
+.status-icons {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+}
+
+.signal {
+    font-size: 12px;
+}
+
+.battery {
+    width: 23px;
+    height: 11px;
+    border: 1px solid white;
+    border-radius: 3px;
+    position: relative;
+}
+
+.battery::after {
+    content: "";
+    position: absolute;
+    right: -3px;
+    top: 3px;
+    width: 2px;
+    height: 5px;
+    background: white;
+}
+
+.battery-level {
+    width: 22%;
+    height: 100%;
+    background: #ff3030;
+}
+
+/* Main */
+.content {
+    position: absolute;
+    inset: 44px 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 7vh 25px 35px;
+    text-align: center;
+    z-index: 2;
+}
+
+.warning-icon {
+    width: 78px;
+    height: 78px;
+    border: 3px solid #ff3030;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff3030;
+    font-size: 43px;
+    font-weight: 700;
+    box-shadow:
+        0 0 15px #ff3030,
+        0 0 45px #ff000055;
+    animation: pulse 1s infinite;
+}
+
+h1 {
+    margin: 25px 0 8px;
+    color: #ff3b30;
+    font-size: clamp(25px, 7vw, 38px);
+    letter-spacing: 1px;
+}
+
+.subtitle {
+    color: #ffb3b3;
+    font-size: clamp(14px, 4vw, 18px);
+    max-width: 430px;
+    line-height: 1.45;
+}
+
+.panel {
+    width: min(100%, 430px);
+    margin-top: 28px;
+    padding: 18px;
+    background: rgba(30,0,0,.7);
+    border: 1px solid #650000;
+    border-radius: 12px;
+    text-align: left;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid #330000;
+    font-family: monospace;
+    font-size: 13px;
+}
+
+.row:last-child {
+    border-bottom: none;
+}
+
+.red {
+    color: #ff3b30;
+}
+
+.yellow {
+    color: #ffd60a;
+}
+
+.green {
+    color: #30ff75;
+}
+
+/* Progress */
+.progress-wrap {
+    width: min(100%, 430px);
+    margin-top: 25px;
+}
+
+.progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-family: monospace;
+    font-size: 12px;
+    margin-bottom: 7px;
+}
+
+.progress {
+    width: 100%;
+    height: 9px;
+    background: #260000;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #ff3030;
+    box-shadow: 0 0 12px #ff3030;
+    transition: width .15s linear;
+}
+
+/* Fake terminal */
+.terminal {
+    width: min(100%, 430px);
+    margin-top: 18px;
+    height: 105px;
+    overflow: hidden;
+    background: rgba(0,0,0,.8);
+    border: 1px solid #242424;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: left;
+    color: #00ff66;
+    font: 11px/1.5 monospace;
+}
+
+/* Final prank screen */
+.final {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    background:
+        radial-gradient(circle, #063b17, #001108 70%);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 30px;
+    text-align: center;
+}
+
+.final.show {
+    display: flex;
+}
+
+.final h2 {
+    font-size: clamp(34px, 11vw, 60px);
+    color: #30ff75;
+    margin: 0 0 15px;
+    text-shadow: 0 0 25px #30ff75;
+}
+
+.final p {
+    font-size: 18px;
+    color: #b9ffd0;
+    line-height: 1.5;
+}
+
+button {
+    margin-top: 25px;
+    padding: 14px 25px;
+    border: 1px solid #30ff75;
+    border-radius: 10px;
+    background: transparent;
+    color: #30ff75;
+    font-size: 16px;
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.08);
+        opacity: .65;
+    }
+}
+
+/* Larger phones/tablets */
+@media (min-width: 600px) {
+    .phone {
+        max-width: 500px;
+        margin: auto;
+        box-shadow: 0 0 80px #ff000022;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="phone">
+
+    <div class="status">
+        <span id="time">9:41</span>
+
+        <div class="status-icons">
+            <span class="signal">▮▮▮</span>
+            <span>Wi-Fi</span>
+            <div class="battery">
+                <div class="battery-level"></div>
+            </div>
+        </div>
+    </div>
+
+    <main class="content">
+
+        <div class="warning-icon">!</div>
+
+        <h1>SECURITY ALERT</h1>
+
+        <div class="subtitle">
+            Suspicious activity has been detected
+            in this simulated device environment.
+        </div>
+
+        <div class="panel">
+
+            <div class="row">
+                <span>Device</span>
+                <span class="green" id="device">DETECTING</span>
+            </div>
+
+            <div class="row">
+                <span>Security</span>
+                <span class="red">COMPROMISED</span>
+            </div>
+
+            <div class="row">
+                <span>Encryption</span>
+                <span class="yellow">BYPASSING</span>
+            </div>
+
+            <div class="row">
+                <span>Threat level</span>
+                <span class="red">CRITICAL</span>
+            </div>
+
+        </div>
+
+        <div class="progress-wrap">
+
+            <div class="progress-text">
+                <span>SIMULATED SYSTEM SCAN</span>
+                <span id="percent">0%</span>
+            </div>
+
+            <div class="progress">
+                <div class="progress-bar" id="bar"></div>
+            </div>
+
+        </div>
+
+        <div class="terminal" id="terminal"></div>
+
+    </main>
+
+    <section class="final" id="final">
+
+        <h2>😂 GOTCHA!</h2>
+
+        <p>
+            Your phone wasn't hacked.<br><br>
+            This was just a harmless prank.
+        </p>
+
+        <button onclick="location.reload()">
+            Run Again
+        </button>
+
+    </section>
+
+</div>
+
+<script>
+
+/* Device label — only identifies the browser platform */
+const ua = navigator.userAgent.toLowerCase();
+
+let device = "MOBILE DEVICE";
+
+if (ua.includes("iphone")) {
+    device = "iPHONE";
+} else if (ua.includes("ipad")) {
+    device = "iPAD";
+} else if (ua.includes("android")) {
+    device = "ANDROID";
+}
+
+document.getElementById("device").textContent = device;
+
+
+/* Clock */
+function updateClock() {
+
+    const now = new Date();
+
+    let h = now.getHours();
+    let m = String(now.getMinutes()).padStart(2, "0");
+
+    h = h % 12 || 12;
+
+    document.getElementById("time").textContent =
+        h + ":" + m;
+}
+
+updateClock();
+setInterval(updateClock, 1000);
+
+
+/* Fake terminal messages */
+const messages = [
+    "[SIM] Initializing security scanner...",
+    "[SIM] Checking virtual environment...",
+    "[SIM] Detecting suspicious activity...",
+    "[SIM] Encrypting simulated connection...",
+    "[SIM] Analyzing security status...",
+    "[SIM] WARNING: SIMULATED BREACH",
+    "[SIM] Running final security check..."
+];
+
+const terminal = document.getElementById("terminal");
+const bar = document.getElementById("bar");
+const percent = document.getElementById("percent");
+
+let progress = 0;
+let messageIndex = 0;
+
+function addMessage(text) {
+
+    const line = document.createElement("div");
+    line.textContent = text;
+
+    terminal.appendChild(line);
+
+    while (terminal.children.length > 6) {
+        terminal.removeChild(terminal.firstChild);
+    }
+
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+function scan() {
+
+    if (progress >= 100) {
+
+        setTimeout(() => {
+            document.getElementById("final")
+                .classList.add("show");
+        }, 1800);
+
+        return;
+    }
+
+    progress += Math.floor(Math.random() * 4) + 1;
+
+    if (progress > 100)
+        progress = 100;
+
+    bar.style.width = progress + "%";
+    percent.textContent = progress + "%";
+
+    if (progress > messageIndex * 13) {
+
+        if (messageIndex < messages.length) {
+            addMessage(messages[messageIndex]);
+            messageIndex++;
+        }
+    }
+
+    setTimeout(scan, 100 + Math.random() * 180);
+}
+
+setTimeout(scan, 1200);
+
+</script>
+
+</body>
+</html>
